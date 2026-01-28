@@ -3,784 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="나만의 버킷리스트를 작성하고 저장하세요">
     <title>나의 버킷리스트</title>
+
+    <!-- 외부 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- 폰트 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        :root {
-            /* 따뜻한 테라코타/코랄 계열 */
-            --coral: #E07A5F;
-            --coral-light: #FDF0ED;
-            --coral-dark: #C56B52;
-            --sage: #81B29A;
-            --sage-light: #E8F4EE;
-            --sand: #F4F1DE;
-            --navy: #3D405B;
-            --navy-light: #5C5F7E;
-            --cream: #FEFCF6;
-            --white: #FFFFFF;
-            --border: #E8E4DA;
-            --text: #2C2C2C;
-            --text-muted: #6B6B6B;
-        }
-
-        body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(160deg, var(--cream) 0%, var(--sand) 100%);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.7;
-        }
-
-        /* 상단 헤더 */
-        .top-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(254, 252, 246, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 100;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .home-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: none;
-            border: none;
-            color: var(--navy);
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .home-btn:hover {
-            background: var(--sand);
-        }
-
-        .progress-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .progress-step {
-            width: 32px;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .progress-step.active {
-            background: var(--coral);
-            width: 48px;
-        }
-
-        .progress-step.done {
-            background: var(--sage);
-        }
-
-        .progress-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-left: 8px;
-        }
-
-        /* 메인 컨테이너 */
-        .container {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 80px 24px 40px;
-        }
-
-        /* 화면 전환 */
-        .screen {
-            display: none;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .screen.active {
-            display: block;
-            animation: slideUp 0.5s ease forwards;
-        }
-
-        @keyframes slideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 시작 화면 - 비대칭 레이아웃 */
-        .start-screen {
-            padding: 60px 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        .start-content {
-            text-align: left;
-        }
-
-        .start-visual {
-            position: relative;
-        }
-
-        .floating-card {
-            background: var(--white);
-            border-radius: 20px 4px 20px 4px;
-            padding: 24px;
-            box-shadow: 0 20px 60px rgba(61, 64, 91, 0.12);
-            transform: rotate(3deg);
-            transition: transform 0.3s ease;
-        }
-
-        .floating-card:hover {
-            transform: rotate(0deg) scale(1.02);
-        }
-
-        .floating-card .emoji {
-            font-size: 4rem;
-            margin-bottom: 16px;
-        }
-
-        .floating-card .preview-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px dashed var(--border);
-            font-size: 0.95rem;
-            color: var(--text-muted);
-        }
-
-        .floating-card .preview-item:last-child {
-            border: none;
-        }
-
-        .start-content h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            color: var(--navy);
-        }
-
-        .start-content h1 span {
-            color: var(--coral);
-        }
-
-        .start-content p {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-bottom: 32px;
-            line-height: 1.8;
-        }
-
-        /* 버튼 스타일 */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 16px 28px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: var(--coral);
-            color: white;
-            border-radius: 14px 4px 14px 4px;
-            box-shadow: 0 4px 20px rgba(224, 122, 95, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: var(--coral-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(224, 122, 95, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--navy);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--navy);
-            background: var(--sand);
-        }
-
-        .btn-sage {
-            background: var(--sage);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(129, 178, 154, 0.3);
-        }
-
-        .btn-sage:hover {
-            background: #6FA388;
-            transform: translateY(-2px);
-        }
-
-        /* 이름 입력 화면 */
-        .name-screen {
-            padding: 80px 0;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .name-screen h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--navy);
-        }
-
-        .name-screen p {
-            color: var(--text-muted);
-            margin-bottom: 32px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            margin-bottom: 28px;
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            padding: 20px 24px;
-            font-size: 1.2rem;
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            background: var(--white);
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .input-wrapper input:focus {
-            outline: none;
-            border-color: var(--coral);
-            box-shadow: 0 0 0 4px var(--coral-light);
-        }
-
-        .input-wrapper input::placeholder {
-            color: #B8B8B8;
-        }
-
-        /* 작성 화면 */
-        .write-screen {
-            padding: 30px 0;
-        }
-
-        .write-header {
-            margin-bottom: 36px;
-        }
-
-        .write-header h2 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--navy);
-            margin-bottom: 8px;
-        }
-
-        .write-header p {
-            color: var(--text-muted);
-        }
-
-        .category-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .category-card:nth-child(1) { border-radius: 20px 4px 4px 4px; }
-        .category-card:nth-child(2) { border-radius: 4px 20px 4px 4px; }
-        .category-card:nth-child(3) { border-radius: 4px 4px 20px 4px; }
-        .category-card:nth-child(4) { border-radius: 4px 4px 4px 20px; }
-        .category-card:nth-child(n+5) { border-radius: 12px; }
-
-        .category-card:hover {
-            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-            transform: translateY(-2px);
-        }
-
-        .category-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .category-badge {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .category-badge.family { background: #FFEFEF; }
-        .category-badge.place { background: #E6F4FF; }
-        .category-badge.learn { background: var(--sage-light); }
-        .category-badge.custom { background: #FFF3E0; }
-
-        .category-info h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--navy);
-            margin-bottom: 2px;
-        }
-
-        .category-info span {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .delete-category-btn {
-            margin-left: auto;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .delete-category-btn:hover {
-            background: #FFEFEF;
-            color: #E53E3E;
-        }
-
-        .category-body {
-            padding: 20px 24px;
-        }
-
-        .item-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .item-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .item-number {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--sand);
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .item-row input {
-            flex: 1;
-            padding: 14px 18px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-            font-family: inherit;
-            background: var(--cream);
-        }
-
-        .item-row input:focus {
-            outline: none;
-            border-color: var(--sage);
-            background: var(--white);
-            box-shadow: 0 0 0 3px var(--sage-light);
-        }
-
-        .item-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-
-        .item-btn.add {
-            background: var(--sage-light);
-            color: var(--sage);
-        }
-
-        .item-btn.add:hover {
-            background: var(--sage);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .item-btn.remove {
-            background: #FFF5F5;
-            color: #E57373;
-        }
-
-        .item-btn.remove:hover {
-            background: #E57373;
-            color: white;
-        }
-
-        /* 카테고리 추가 */
-        .add-category-area {
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 32px;
-            transition: all 0.2s;
-        }
-
-        .add-category-area:hover {
-            border-color: var(--coral);
-            background: var(--coral-light);
-        }
-
-        .add-category-trigger {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: none;
-            border: none;
-            color: var(--coral);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .add-category-form {
-            display: none;
-            gap: 12px;
-            margin-top: 16px;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .add-category-form.show {
-            display: flex;
-        }
-
-        .add-category-form input {
-            flex: 1;
-            padding: 14px 18px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-family: inherit;
-        }
-
-        .add-category-form input:focus {
-            outline: none;
-            border-color: var(--coral);
-        }
-
-        /* 버튼 그룹 */
-        .action-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 0;
-            border-top: 1px solid var(--border);
-            margin-top: 20px;
-        }
-
-        .action-bar-left,
-        .action-bar-right {
-            display: flex;
-            gap: 12px;
-        }
-
-        /* 결과 화면 */
-        .result-screen {
-            padding: 30px 0;
-        }
-
-        .result-card {
-            background: var(--white);
-            border-radius: 24px 8px 24px 8px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(61, 64, 91, 0.1);
-        }
-
-        .result-banner {
-            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
-            color: white;
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .result-banner::before {
-            content: '🪣';
-            position: absolute;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 5rem;
-            opacity: 0.2;
-        }
-
-        .result-banner h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .result-banner .name {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .result-banner .date {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            margin-top: 4px;
-        }
-
-        .result-body {
-            padding: 32px;
-        }
-
-        .result-section {
-            margin-bottom: 28px;
-        }
-
-        .result-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .result-section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--sand);
-        }
-
-        .result-section-header .icon {
-            font-size: 1.4rem;
-        }
-
-        .result-section-header h3 {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--navy);
-        }
-
-        .result-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding-left: 8px;
-        }
-
-        .result-list-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 12px 16px;
-            background: var(--cream);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .result-list-item::before {
-            content: '✓';
-            color: var(--sage);
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .result-footer-text {
-            text-align: center;
-            padding: 24px;
-            background: var(--sand);
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        /* 결과 액션바 */
-        .result-actions {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 32px;
-            flex-wrap: wrap;
-        }
-
-        /* 인쇄 스타일 */
-        @media print {
-            body {
-                background: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .top-header,
-            .no-print {
-                display: none !important;
-            }
-
-            .container {
-                max-width: 100%;
-                padding: 0;
-            }
-
-            .result-card {
-                box-shadow: none;
-            }
-
-            .result-screen {
-                display: block !important;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            .screen:not(.result-screen) {
-                display: none !important;
-            }
-        }
-
-        /* 반응형 */
-        @media (max-width: 768px) {
-            .start-screen {
-                grid-template-columns: 1fr;
-                gap: 40px;
-                text-align: center;
-            }
-
-            .start-content {
-                text-align: center;
-                order: 1;
-            }
-
-            .start-visual {
-                order: 0;
-            }
-
-            .start-content h1 {
-                font-size: 2.2rem;
-            }
-
-            .floating-card {
-                transform: rotate(0);
-                max-width: 280px;
-                margin: 0 auto;
-            }
-
-            .action-bar {
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .action-bar-left,
-            .action-bar-right {
-                width: 100%;
-            }
-
-            .action-bar .btn {
-                flex: 1;
-            }
-
-            .result-actions {
-                flex-direction: column;
-            }
-
-            .result-actions .btn {
-                width: 100%;
-            }
-        }
-
-        /* 애니메이션 */
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(3deg); }
-            50% { transform: translateY(-10px) rotate(3deg); }
-        }
-
-        .floating-card {
-            animation: float 4s ease-in-out infinite;
-        }
-
-        .floating-card:hover {
-            animation: none;
-        }
-
-        /* 입력 필드 애니메이션 */
-        .item-row {
-            animation: fadeInUp 0.3s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
+    <!-- 스타일시트 -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 상단 헤더 -->
-    <header class="top-header no-print">
-        <button class="home-btn" onclick="goHome()">
-            <span>🏠</span>
+    <!-- 상단 헤더 (네비게이션) -->
+    <header class="top-header no-print" role="navigation" aria-label="메인 네비게이션">
+        <button class="home-btn" onclick="BucketList.goHome()" aria-label="처음 화면으로 돌아가기">
+            <span aria-hidden="true">🏠</span>
             <span>처음으로</span>
         </button>
-        <div class="progress-bar">
+        <div class="progress-bar" role="progressbar" aria-label="진행 상태">
             <div class="progress-step" id="step1"></div>
             <div class="progress-step" id="step2"></div>
             <div class="progress-step" id="step3"></div>
@@ -789,22 +33,22 @@
         </div>
     </header>
 
-    <div class="container">
-        <!-- 시작 화면 -->
-        <div id="startScreen" class="screen active">
+    <main class="container">
+        <!-- 화면 1: 시작 -->
+        <section id="startScreen" class="screen active" role="region" aria-label="시작 화면">
             <div class="start-screen">
                 <div class="start-content">
-                    <h1>나만의<br><span>버킷리스트</span><br>만들기</h1>
+                    <h1>나만의<br><span class="highlight">버킷리스트</span><br>만들기</h1>
                     <p>
                         죽기 전에 꼭 해보고 싶은 일들을 적어보세요.<br>
                         꿈을 글로 적는 순간, 그 꿈은 목표가 됩니다.
                     </p>
-                    <button class="btn btn-primary" onclick="goToName()">
-                        시작하기 <span>→</span>
+                    <button class="btn btn-primary" onclick="BucketList.goToName()" aria-label="버킷리스트 작성 시작하기">
+                        시작하기 <span aria-hidden="true">→</span>
                     </button>
                 </div>
                 <div class="start-visual">
-                    <div class="floating-card">
+                    <div class="floating-card" aria-hidden="true">
                         <div class="emoji">🪣</div>
                         <div class="preview-item">
                             <span>💕</span> 가족과 해외여행 가기
@@ -818,374 +62,166 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 이름 입력 화면 -->
-        <div id="nameScreen" class="screen">
+        <!-- 화면 2: 이름 입력 -->
+        <section id="nameScreen" class="screen" role="region" aria-label="이름 입력">
             <div class="name-screen">
                 <h2>반가워요! 👋</h2>
                 <p>버킷리스트에 들어갈 이름을 알려주세요.</p>
                 <div class="input-wrapper">
-                    <input type="text" id="userName" placeholder="이름을 입력하세요" maxlength="20">
+                    <input
+                        type="text"
+                        id="userName"
+                        placeholder="이름을 입력하세요"
+                        maxlength="20"
+                        aria-label="이름 입력"
+                        aria-describedby="nameError"
+                        autocomplete="name"
+                    >
+                    <span class="error-message" id="nameError" role="alert"></span>
                 </div>
-                <button class="btn btn-primary" onclick="goToWrite()">
-                    다음 단계로 <span>→</span>
+                <button class="btn btn-primary" onclick="BucketList.goToWrite()">
+                    다음 단계로 <span aria-hidden="true">→</span>
                 </button>
             </div>
-        </div>
+        </section>
 
-        <!-- 작성 화면 -->
-        <div id="writeScreen" class="screen">
+        <!-- 화면 3: 버킷리스트 작성 -->
+        <section id="writeScreen" class="screen" role="region" aria-label="버킷리스트 작성">
             <div class="write-screen">
-                <div class="write-header">
+                <header class="write-header">
                     <h2>📝 버킷리스트 작성하기</h2>
                     <p>각 카테고리에 하고 싶은 일들을 자유롭게 적어보세요</p>
-                </div>
+                </header>
 
-                <div id="categoriesContainer">
-                    <!-- 카테고리 1 -->
-                    <div class="category-card" data-category="family">
-                        <div class="category-header">
-                            <div class="category-badge family">💕</div>
+                <div id="categoriesContainer" role="list" aria-label="카테고리 목록">
+                    <!-- 카테고리 1: 가족·친구 -->
+                    <article class="category-card" data-category="family" role="listitem">
+                        <header class="category-header">
+                            <div class="category-badge family" aria-hidden="true">💕</div>
                             <div class="category-info">
                                 <h3>가족·친구와 함께하고 싶은 일</h3>
                                 <span>소중한 사람들과 함께 하고 싶은 것들</span>
                             </div>
-                        </div>
+                        </header>
                         <div class="category-body">
-                            <div class="item-list" id="familyItems">
-                                <div class="item-row">
-                                    <span class="item-number">1</span>
-                                    <input type="text" placeholder="예: 가족과 함께 유럽 여행 가기">
-                                    <button class="item-btn add" onclick="addItem('familyItems')">+</button>
+                            <div class="item-list" id="familyItems" role="list">
+                                <div class="item-row" role="listitem">
+                                    <span class="item-number" aria-hidden="true">1</span>
+                                    <input type="text" placeholder="예: 가족과 함께 유럽 여행 가기" aria-label="버킷리스트 항목 1">
+                                    <button class="item-btn add" onclick="BucketList.addItem('familyItems')" aria-label="항목 추가">+</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </article>
 
-                    <!-- 카테고리 2 -->
-                    <div class="category-card" data-category="place">
-                        <div class="category-header">
-                            <div class="category-badge place">🌍</div>
+                    <!-- 카테고리 2: 장소·도전 -->
+                    <article class="category-card" data-category="place" role="listitem">
+                        <header class="category-header">
+                            <div class="category-badge place" aria-hidden="true">🌍</div>
                             <div class="category-info">
                                 <h3>가보고 싶은 곳·도전하고 싶은 것</h3>
                                 <span>새로운 장소, 새로운 경험, 새로운 도전</span>
                             </div>
-                        </div>
+                        </header>
                         <div class="category-body">
-                            <div class="item-list" id="placeItems">
-                                <div class="item-row">
-                                    <span class="item-number">1</span>
-                                    <input type="text" placeholder="예: 제주도 올레길 완주하기">
-                                    <button class="item-btn add" onclick="addItem('placeItems')">+</button>
+                            <div class="item-list" id="placeItems" role="list">
+                                <div class="item-row" role="listitem">
+                                    <span class="item-number" aria-hidden="true">1</span>
+                                    <input type="text" placeholder="예: 제주도 올레길 완주하기" aria-label="버킷리스트 항목 1">
+                                    <button class="item-btn add" onclick="BucketList.addItem('placeItems')" aria-label="항목 추가">+</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </article>
 
-                    <!-- 카테고리 3 -->
-                    <div class="category-card" data-category="learn">
-                        <div class="category-header">
-                            <div class="category-badge learn">📚</div>
+                    <!-- 카테고리 3: 학습·봉사 -->
+                    <article class="category-card" data-category="learn" role="listitem">
+                        <header class="category-header">
+                            <div class="category-badge learn" aria-hidden="true">📚</div>
                             <div class="category-info">
                                 <h3>배우고 싶은 것·나누고 싶은 것</h3>
                                 <span>배움의 기쁨, 나눔의 행복</span>
                             </div>
-                        </div>
+                        </header>
                         <div class="category-body">
-                            <div class="item-list" id="learnItems">
-                                <div class="item-row">
-                                    <span class="item-number">1</span>
-                                    <input type="text" placeholder="예: 피아노 배워서 연주하기">
-                                    <button class="item-btn add" onclick="addItem('learnItems')">+</button>
+                            <div class="item-list" id="learnItems" role="list">
+                                <div class="item-row" role="listitem">
+                                    <span class="item-number" aria-hidden="true">1</span>
+                                    <input type="text" placeholder="예: 피아노 배워서 연주하기" aria-label="버킷리스트 항목 1">
+                                    <button class="item-btn add" onclick="BucketList.addItem('learnItems')" aria-label="항목 추가">+</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 </div>
 
-                <!-- 카테고리 추가 -->
+                <!-- 카테고리 추가 영역 -->
                 <div class="add-category-area">
-                    <button class="add-category-trigger" onclick="toggleAddCategory()">
-                        <span>➕</span> 나만의 카테고리 추가하기
+                    <button class="add-category-trigger" onclick="BucketList.toggleAddCategory()" aria-expanded="false" aria-controls="addCategoryForm">
+                        <span aria-hidden="true">➕</span> 나만의 카테고리 추가하기
                     </button>
-                    <div class="add-category-form" id="addCategoryForm">
-                        <input type="text" id="newCategoryName" placeholder="카테고리 이름 입력">
-                        <button class="btn btn-primary" onclick="addCustomCategory()">추가</button>
+                    <div class="add-category-form" id="addCategoryForm" aria-hidden="true">
+                        <input
+                            type="text"
+                            id="newCategoryName"
+                            placeholder="카테고리 이름 입력"
+                            aria-label="새 카테고리 이름"
+                        >
+                        <button class="btn btn-primary" onclick="BucketList.addCustomCategory()">추가</button>
                     </div>
                 </div>
 
-                <div class="action-bar no-print">
+                <!-- 하단 액션 버튼 -->
+                <nav class="action-bar no-print" aria-label="페이지 네비게이션">
                     <div class="action-bar-left">
-                        <button class="btn btn-secondary" onclick="goToName()">← 이전</button>
+                        <button class="btn btn-secondary" onclick="BucketList.goToName()">
+                            <span aria-hidden="true">←</span> 이전
+                        </button>
                     </div>
                     <div class="action-bar-right">
-                        <button class="btn btn-primary" onclick="goToResult()">완성하기 →</button>
+                        <button class="btn btn-primary" onclick="BucketList.goToResult()">
+                            완성하기 <span aria-hidden="true">→</span>
+                        </button>
                     </div>
-                </div>
+                </nav>
             </div>
-        </div>
+        </section>
 
-        <!-- 결과 화면 -->
-        <div id="resultScreen" class="screen">
+        <!-- 화면 4: 결과 -->
+        <section id="resultScreen" class="screen" role="region" aria-label="완성된 버킷리스트">
             <div class="result-screen">
-                <div class="result-card" id="resultCard">
-                    <div class="result-banner">
+                <article class="result-card" id="resultCard">
+                    <header class="result-banner">
                         <h2>🪣 나의 버킷리스트</h2>
                         <div class="name" id="resultName"></div>
                         <div class="date" id="resultDate"></div>
-                    </div>
+                    </header>
                     <div class="result-body" id="resultBody">
                         <!-- 결과가 여기에 동적으로 생성됨 -->
                     </div>
-                    <div class="result-footer-text">
+                    <footer class="result-footer-text">
                         꿈을 적는 순간, 그 꿈은 목표가 됩니다 ✨
-                    </div>
-                </div>
+                    </footer>
+                </article>
 
-                <div class="result-actions no-print">
-                    <button class="btn btn-secondary" onclick="goToWrite()">← 수정하기</button>
-                    <button class="btn btn-sage" onclick="saveAsImage()">📷 이미지 저장</button>
-                    <button class="btn btn-primary" onclick="printResult()">🖨️ 인쇄하기</button>
-                </div>
+                <nav class="result-actions no-print" aria-label="저장 옵션">
+                    <button class="btn btn-secondary" onclick="BucketList.goToWrite()">
+                        <span aria-hidden="true">←</span> 수정하기
+                    </button>
+                    <button class="btn btn-sage" onclick="BucketList.saveAsImage()">
+                        <span aria-hidden="true">📷</span> 이미지 저장
+                    </button>
+                    <button class="btn btn-primary" onclick="BucketList.printResult()">
+                        <span aria-hidden="true">🖨️</span> 인쇄하기
+                    </button>
+                </nav>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-    <script>
-        let customCategoryCount = 0;
-        let currentStep = 1;
-
-        // 진행 상태 업데이트
-        function updateProgress(step, label) {
-            currentStep = step;
-            const steps = ['step1', 'step2', 'step3', 'step4'];
-            const labels = ['시작', '이름 입력', '작성 중', '완성!'];
-
-            steps.forEach((id, index) => {
-                const el = document.getElementById(id);
-                el.classList.remove('active', 'done');
-                if (index + 1 < step) {
-                    el.classList.add('done');
-                } else if (index + 1 === step) {
-                    el.classList.add('active');
-                }
-            });
-
-            document.getElementById('progressLabel').textContent = label || labels[step - 1];
-        }
-
-        // 화면 전환
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function goHome() {
-            showScreen('startScreen');
-            updateProgress(1, '시작');
-        }
-
-        function goToName() {
-            showScreen('nameScreen');
-            updateProgress(2, '이름 입력');
-            setTimeout(() => document.getElementById('userName').focus(), 300);
-        }
-
-        function goToWrite() {
-            const name = document.getElementById('userName').value.trim();
-            if (!name) {
-                alert('이름을 입력해 주세요!');
-                document.getElementById('userName').focus();
-                return;
-            }
-            showScreen('writeScreen');
-            updateProgress(3, '작성 중');
-        }
-
-        function goToResult() {
-            generateResult();
-            showScreen('resultScreen');
-            updateProgress(4, '완성!');
-        }
-
-        // 항목 추가
-        function addItem(containerId) {
-            const container = document.getElementById(containerId);
-            const itemCount = container.children.length + 1;
-            const newRow = document.createElement('div');
-            newRow.className = 'item-row';
-            newRow.innerHTML = `
-                <span class="item-number">${itemCount}</span>
-                <input type="text" placeholder="해보고 싶은 일을 적어보세요">
-                <button class="item-btn remove" onclick="removeItem(this, '${containerId}')">×</button>
-            `;
-            container.appendChild(newRow);
-            newRow.querySelector('input').focus();
-            updateItemNumbers(containerId);
-        }
-
-        // 항목 삭제
-        function removeItem(btn, containerId) {
-            const row = btn.parentElement;
-            const container = document.getElementById(containerId);
-            if (container.children.length > 1) {
-                row.remove();
-                updateItemNumbers(containerId);
-            } else {
-                row.querySelector('input').value = '';
-            }
-        }
-
-        // 아이템 번호 업데이트
-        function updateItemNumbers(containerId) {
-            const container = document.getElementById(containerId);
-            const rows = container.querySelectorAll('.item-row');
-            rows.forEach((row, index) => {
-                const numEl = row.querySelector('.item-number');
-                if (numEl) numEl.textContent = index + 1;
-            });
-        }
-
-        // 카테고리 추가 토글
-        function toggleAddCategory() {
-            const form = document.getElementById('addCategoryForm');
-            form.classList.toggle('show');
-            if (form.classList.contains('show')) {
-                document.getElementById('newCategoryName').focus();
-            }
-        }
-
-        // 커스텀 카테고리 추가
-        function addCustomCategory() {
-            const nameInput = document.getElementById('newCategoryName');
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert('카테고리 이름을 입력해 주세요!');
-                nameInput.focus();
-                return;
-            }
-
-            customCategoryCount++;
-            const categoryId = `customItems${customCategoryCount}`;
-
-            const categoryHTML = `
-                <div class="category-card" data-category="custom">
-                    <div class="category-header">
-                        <div class="category-badge custom">⭐</div>
-                        <div class="category-info">
-                            <h3>${name}</h3>
-                            <span>나만의 카테고리</span>
-                        </div>
-                        <button class="delete-category-btn" onclick="removeCategory(this)">✕</button>
-                    </div>
-                    <div class="category-body">
-                        <div class="item-list" id="${categoryId}">
-                            <div class="item-row">
-                                <span class="item-number">1</span>
-                                <input type="text" placeholder="해보고 싶은 일을 적어보세요">
-                                <button class="item-btn add" onclick="addItem('${categoryId}')">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('categoriesContainer').insertAdjacentHTML('beforeend', categoryHTML);
-            nameInput.value = '';
-            document.getElementById('addCategoryForm').classList.remove('show');
-        }
-
-        // 카테고리 삭제
-        function removeCategory(btn) {
-            if (confirm('이 카테고리를 삭제하시겠습니까?')) {
-                btn.closest('.category-card').remove();
-            }
-        }
-
-        // 결과 생성
-        function generateResult() {
-            const name = document.getElementById('userName').value.trim();
-            const today = new Date();
-            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-
-            document.getElementById('resultName').textContent = `${name}의 버킷리스트`;
-            document.getElementById('resultDate').textContent = `작성일: ${dateStr}`;
-
-            const resultBody = document.getElementById('resultBody');
-            resultBody.innerHTML = '';
-
-            const categories = document.querySelectorAll('.category-card');
-            let hasContent = false;
-
-            categories.forEach(category => {
-                const title = category.querySelector('.category-info h3').textContent;
-                const badge = category.querySelector('.category-badge').textContent;
-                const inputs = category.querySelectorAll('.item-list input');
-
-                const items = [];
-                inputs.forEach(input => {
-                    const value = input.value.trim();
-                    if (value) items.push(value);
-                });
-
-                if (items.length > 0) {
-                    hasContent = true;
-                    const sectionHTML = `
-                        <div class="result-section">
-                            <div class="result-section-header">
-                                <span class="icon">${badge}</span>
-                                <h3>${title}</h3>
-                            </div>
-                            <div class="result-list">
-                                ${items.map(item => `<div class="result-list-item">${item}</div>`).join('')}
-                            </div>
-                        </div>
-                    `;
-                    resultBody.insertAdjacentHTML('beforeend', sectionHTML);
-                }
-            });
-
-            if (!hasContent) {
-                resultBody.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 60px 20px;">아직 작성된 버킷리스트가 없습니다.<br>이전 단계로 돌아가서 꿈을 적어보세요!</p>';
-            }
-        }
-
-        // 이미지 저장
-        function saveAsImage() {
-            const card = document.getElementById('resultCard');
-            const name = document.getElementById('userName').value.trim();
-
-            html2canvas(card, {
-                scale: 2,
-                backgroundColor: '#FFFFFF',
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `${name}_버킷리스트.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        }
-
-        // 인쇄
-        function printResult() {
-            window.print();
-        }
-
-        // Enter 키
-        document.getElementById('userName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') goToWrite();
-        });
-
-        document.getElementById('newCategoryName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addCustomCategory();
-        });
-
-        // 초기화
-        updateProgress(1);
-    </script>
+    <!-- 스크립트 -->
+    <script src="app.js"></script>
 </body>
 </html>

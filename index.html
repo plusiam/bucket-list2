@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="나만의 버킷리스트를 작성하고 꾸며서 저장하세요">
+    <title>나의 버킷리스트</title>
+
+    <!-- 외부 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gaegu:wght@300;400;700&family=Jua&family=Gamja+Flower&family=Hi+Melody&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+
+    <!-- 스타일시트 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 상단 헤더 (네비게이션) -->
+    <header class="top-header no-print" role="navigation" aria-label="메인 네비게이션">
+        <button class="home-btn" onclick="BucketList.goHome()" aria-label="처음 화면으로 돌아가기">
+            <span aria-hidden="true">🏠</span>
+            <span>처음으로</span>
+        </button>
+        <div class="progress-bar" role="progressbar" aria-label="진행 상태">
+            <div class="progress-step" id="step1"></div>
+            <div class="progress-step" id="step2"></div>
+            <div class="progress-step" id="step3"></div>
+            <div class="progress-step" id="step4"></div>
+            <span class="progress-label" id="progressLabel">시작</span>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 화면 1: 시작 -->
+        <section id="startScreen" class="screen active" role="region" aria-label="시작 화면">
+            <div class="start-screen">
+                <div class="start-content">
+                    <h1>나만의<br><span class="highlight">버킷리스트</span><br>만들기</h1>
+                    <p>
+                        죽기 전에 꼭 해보고 싶은 일들을 적어보세요.<br>
+                        꿈을 글로 적는 순간, 그 꿈은 목표가 됩니다.
+                    </p>
+                    <button class="btn btn-primary" onclick="BucketList.goToName()" aria-label="버킷리스트 작성 시작하기">
+                        시작하기 <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+                <div class="start-visual">
+                    <div class="floating-card" aria-hidden="true">
+                        <div class="emoji">🪣</div>
+                        <div class="preview-item">
+                            <span>💕</span> 가족과 해외여행 가기
+                        </div>
+                        <div class="preview-item">
+                            <span>🌍</span> 제주 올레길 완주하기
+                        </div>
+                        <div class="preview-item">
+                            <span>📚</span> 피아노 연주 배우기
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 화면 2: 이름 입력 -->
+        <section id="nameScreen" class="screen" role="region" aria-label="이름 입력">
+            <div class="name-screen">
+                <h2>반가워요! 👋</h2>
+                <p>버킷리스트에 들어갈 이름을 알려주세요.</p>
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        id="userName"
+                        placeholder="이름을 입력하세요"
+                        maxlength="20"
+                        aria-label="이름 입력"
+                        aria-describedby="nameError"
+                        autocomplete="name"
+                    >
+                    <span class="error-message" id="nameError" role="alert"></span>
+                </div>
+                <button class="btn btn-primary" onclick="BucketList.goToWrite()">
+                    다음 단계로 <span aria-hidden="true">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 화면 3: 버킷리스트 작성 -->
+        <section id="writeScreen" class="screen" role="region" aria-label="버킷리스트 작성">
+            <div class="write-screen">
+                <header class="write-header">
+                    <h2>📝 버킷리스트 작성하기</h2>
+                    <p>각 카테고리에 하고 싶은 일들을 자유롭게 적어보세요</p>
+                </header>
+
+                <div id="categoriesContainer" role="list" aria-label="카테고리 목록">
+                    <!-- 카테고리 1: 가족·친구 -->
+                    <article class="category-card" data-category="family" role="listitem">
+                        <header class="category-header">
+                            <div class="category-badge family" aria-hidden="true">💕</div>
+                            <div class="category-info">
+                                <h3>가족·친구와 함께하고 싶은 일</h3>
+                                <span>소중한 사람들과 함께 하고 싶은 것들</span>
+                            </div>
+                        </header>
+                        <div class="category-body">
+                            <div class="item-list" id="familyItems" role="list">
+                                <div class="item-row" role="listitem">
+                                    <span class="item-number" aria-hidden="true">1</span>
+                                    <input type="text" placeholder="예: 가족과 함께 유럽 여행 가기" aria-label="버킷리스트 항목 1">
+                                    <button class="item-btn add" onclick="BucketList.addItem('familyItems')" aria-label="항목 추가">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- 카테고리 2: 장소·도전 -->
+                    <article class="category-card" data-category="place" role="listitem">
+                        <header class="category-header">
+                            <div class="category-badge place" aria-hidden="true">🌍</div>
+                            <div class="category-info">
+                                <h3>가보고 싶은 곳·도전하고 싶은 것</h3>
+                                <span>새로운 장소, 새로운 경험, 새로운 도전</span>
+                            </div>
+                        </header>
+                        <div class="category-body">
+                            <div class="item-list" id="placeItems" role="list">
+                                <div class="item-row" role="listitem">
+                                    <span class="item-number" aria-hidden="true">1</span>
+                                    <input type="text" placeholder="예: 제주도 올레길 완주하기" aria-label="버킷리스트 항목 1">
+                                    <button class="item-btn add" onclick="BucketList.addItem('placeItems')" aria-label="항목 추가">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- 카테고리 3: 학습·봉사 -->
+                    <article class="category-card" data-category="learn" role="listitem">
+                        <header class="category-header">
+                            <div class="category-badge learn" aria-hidden="true">📚</div>
+                            <div class="category-info">
+                                <h3>배우고 싶은 것·나누고 싶은 것</h3>
+                                <span>배움의 기쁨, 나눔의 행복</span>
+                            </div>
+                        </header>
+                        <div class="category-body">
+                            <div class="item-list" id="learnItems" role="list">
+                                <div class="item-row" role="listitem">
+                                    <span class="item-number" aria-hidden="true">1</span>
+                                    <input type="text" placeholder="예: 피아노 배워서 연주하기" aria-label="버킷리스트 항목 1">
+                                    <button class="item-btn add" onclick="BucketList.addItem('learnItems')" aria-label="항목 추가">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- 카테고리 추가 영역 -->
+                <div class="add-category-area">
+                    <button class="add-category-trigger" onclick="BucketList.toggleAddCategory()" aria-expanded="false" aria-controls="addCategoryForm">
+                        <span aria-hidden="true">➕</span> 나만의 카테고리 추가하기
+                    </button>
+                    <div class="add-category-form" id="addCategoryForm" aria-hidden="true">
+                        <input
+                            type="text"
+                            id="newCategoryName"
+                            placeholder="카테고리 이름 입력"
+                            aria-label="새 카테고리 이름"
+                        >
+                        <button class="btn btn-primary" onclick="BucketList.addCustomCategory()">추가</button>
+                    </div>
+                </div>
+
+                <!-- 하단 액션 버튼 -->
+                <nav class="action-bar no-print" aria-label="페이지 네비게이션">
+                    <div class="action-bar-left">
+                        <button class="btn btn-secondary" onclick="BucketList.goToName()">
+                            <span aria-hidden="true">←</span> 이전
+                        </button>
+                    </div>
+                    <div class="action-bar-right">
+                        <button class="btn btn-primary" onclick="BucketList.goToResult()">
+                            완성하기 <span aria-hidden="true">→</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </section>
+
+        <!-- 화면 4: 결과 (커스터마이징 포함) -->
+        <section id="resultScreen" class="screen" role="region" aria-label="완성된 버킷리스트">
+            <div class="result-screen">
+
+                <!-- 커스터마이징 패널 -->
+                <aside class="customize-panel no-print" id="customizePanel">
+                    <div class="customize-header">
+                        <h3>🎨 꾸미기</h3>
+                        <button class="customize-toggle" onclick="BucketList.toggleCustomizePanel()" aria-label="꾸미기 패널 접기">
+                            <span id="customizeToggleIcon">▼</span>
+                        </button>
+                    </div>
+
+                    <div class="customize-body" id="customizeBody">
+                        <!-- 추천 프리셋 -->
+                        <div class="customize-section">
+                            <h4>✨ 추천 조합</h4>
+                            <div class="preset-grid" id="presetGrid">
+                                <button class="preset-btn" onclick="BucketList.applyPreset('romantic')" title="로맨틱 스타일">
+                                    <span class="preset-icon">💕</span>
+                                    <span class="preset-name">로맨틱</span>
+                                </button>
+                                <button class="preset-btn" onclick="BucketList.applyPreset('adventure')" title="모험가 스타일">
+                                    <span class="preset-icon">🚀</span>
+                                    <span class="preset-name">모험가</span>
+                                </button>
+                                <button class="preset-btn" onclick="BucketList.applyPreset('nature')" title="자연친화 스타일">
+                                    <span class="preset-icon">🌿</span>
+                                    <span class="preset-name">자연친화</span>
+                                </button>
+                                <button class="preset-btn" onclick="BucketList.applyPreset('dreamy')" title="몽환적 스타일">
+                                    <span class="preset-icon">🌙</span>
+                                    <span class="preset-name">몽환적</span>
+                                </button>
+                                <button class="preset-btn" onclick="BucketList.applyPreset('warm')" title="따뜻한 스타일">
+                                    <span class="preset-icon">🌅</span>
+                                    <span class="preset-name">따뜻한</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 테마 선택 -->
+                        <div class="customize-section">
+                            <h4>테마 선택</h4>
+                            <div class="theme-grid" id="themeGrid">
+                                <button class="theme-btn active" data-theme="default" onclick="BucketList.setTheme('default')" title="기본">
+                                    <span class="theme-preview default"></span>
+                                    <span class="theme-name">기본</span>
+                                </button>
+                                <button class="theme-btn" data-theme="spring" onclick="BucketList.setTheme('spring')" title="봄꽃">
+                                    <span class="theme-preview spring"></span>
+                                    <span class="theme-name">봄꽃</span>
+                                </button>
+                                <button class="theme-btn" data-theme="ocean" onclick="BucketList.setTheme('ocean')" title="바다">
+                                    <span class="theme-preview ocean"></span>
+                                    <span class="theme-name">바다</span>
+                                </button>
+                                <button class="theme-btn" data-theme="forest" onclick="BucketList.setTheme('forest')" title="숲속">
+                                    <span class="theme-preview forest"></span>
+                                    <span class="theme-name">숲속</span>
+                                </button>
+                                <button class="theme-btn" data-theme="sunset" onclick="BucketList.setTheme('sunset')" title="노을">
+                                    <span class="theme-preview sunset"></span>
+                                    <span class="theme-name">노을</span>
+                                </button>
+                                <button class="theme-btn" data-theme="night" onclick="BucketList.setTheme('night')" title="밤하늘">
+                                    <span class="theme-preview night"></span>
+                                    <span class="theme-name">밤하늘</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 배경 패턴 -->
+                        <div class="customize-section">
+                            <h4>배경 패턴</h4>
+                            <div class="pattern-grid" id="patternGrid">
+                                <button class="pattern-btn active" data-pattern="none" onclick="BucketList.setPattern('none')" title="없음">
+                                    <span class="pattern-preview none">✕</span>
+                                </button>
+                                <button class="pattern-btn" data-pattern="dots" onclick="BucketList.setPattern('dots')" title="점무늬">
+                                    <span class="pattern-preview dots"></span>
+                                </button>
+                                <button class="pattern-btn" data-pattern="lines" onclick="BucketList.setPattern('lines')" title="줄무늬">
+                                    <span class="pattern-preview lines"></span>
+                                </button>
+                                <button class="pattern-btn" data-pattern="grid" onclick="BucketList.setPattern('grid')" title="격자">
+                                    <span class="pattern-preview grid"></span>
+                                </button>
+                                <button class="pattern-btn" data-pattern="waves" onclick="BucketList.setPattern('waves')" title="물결">
+                                    <span class="pattern-preview waves"></span>
+                                </button>
+                                <button class="pattern-btn" data-pattern="confetti" onclick="BucketList.setPattern('confetti')" title="컨페티">
+                                    <span class="pattern-preview confetti"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 폰트 스타일 -->
+                        <div class="customize-section">
+                            <h4>글꼴 스타일</h4>
+                            <div class="font-grid" id="fontGrid">
+                                <button class="font-btn active" data-font="default" onclick="BucketList.setFont('default')">
+                                    <span style="font-family: 'Noto Sans KR'">가나다</span>
+                                    <span class="font-label">기본</span>
+                                </button>
+                                <button class="font-btn" data-font="handwriting" onclick="BucketList.setFont('handwriting')">
+                                    <span style="font-family: 'Gaegu'">가나다</span>
+                                    <span class="font-label">손글씨</span>
+                                </button>
+                                <button class="font-btn" data-font="cute" onclick="BucketList.setFont('cute')">
+                                    <span style="font-family: 'Jua'">가나다</span>
+                                    <span class="font-label">귀여운</span>
+                                </button>
+                                <button class="font-btn" data-font="round" onclick="BucketList.setFont('round')">
+                                    <span style="font-family: 'Gamja Flower'">가나다</span>
+                                    <span class="font-label">동글동글</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 프레임 스타일 -->
+                        <div class="customize-section">
+                            <h4>프레임 스타일</h4>
+                            <div class="frame-grid" id="frameGrid">
+                                <button class="frame-btn active" data-frame="modern" onclick="BucketList.setFrame('modern')" title="모던">
+                                    <span class="frame-preview modern"></span>
+                                    <span class="frame-name">모던</span>
+                                </button>
+                                <button class="frame-btn" data-frame="rounded" onclick="BucketList.setFrame('rounded')" title="둥근">
+                                    <span class="frame-preview rounded"></span>
+                                    <span class="frame-name">둥근</span>
+                                </button>
+                                <button class="frame-btn" data-frame="ticket" onclick="BucketList.setFrame('ticket')" title="티켓">
+                                    <span class="frame-preview ticket"></span>
+                                    <span class="frame-name">티켓</span>
+                                </button>
+                                <button class="frame-btn" data-frame="polaroid" onclick="BucketList.setFrame('polaroid')" title="폴라로이드">
+                                    <span class="frame-preview polaroid"></span>
+                                    <span class="frame-name">폴라로이드</span>
+                                </button>
+                                <button class="frame-btn" data-frame="stamp" onclick="BucketList.setFrame('stamp')" title="우표">
+                                    <span class="frame-preview stamp"></span>
+                                    <span class="frame-name">우표</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 커스텀 컬러 -->
+                        <div class="customize-section">
+                            <h4>직접 색상 선택</h4>
+                            <div class="color-pickers">
+                                <div class="color-picker-item">
+                                    <label for="headerColorPicker">헤더 색상</label>
+                                    <input type="color" id="headerColorPicker" value="#E07A5F" onchange="BucketList.setCustomColor('header', this.value)">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="bgColorPicker">배경 색상</label>
+                                    <input type="color" id="bgColorPicker" value="#FFFFFF" onchange="BucketList.setCustomColor('bg', this.value)">
+                                </div>
+                                <div class="color-picker-item">
+                                    <label for="textColorPicker">글자 색상</label>
+                                    <input type="color" id="textColorPicker" value="#2C2C2C" onchange="BucketList.setCustomColor('text', this.value)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 스티커 추가 -->
+                        <div class="customize-section">
+                            <h4>스티커 추가</h4>
+                            <p class="sticker-hint">클릭하면 카드에 추가됩니다</p>
+                            <div class="sticker-grid" id="stickerGrid">
+                                <button class="sticker-btn" onclick="BucketList.addSticker('⭐')">⭐</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🌟')">🌟</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('💫')">💫</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('✨')">✨</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🎀')">🎀</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🌈')">🌈</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🦋')">🦋</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🌸')">🌸</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🌺')">🌺</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🍀')">🍀</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🌻')">🌻</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🎈')">🎈</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🎁')">🎁</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('💝')">💝</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🏆')">🏆</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🎯')">🎯</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🚀')">🚀</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('💪')">💪</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('🎵')">🎵</button>
+                                <button class="sticker-btn" onclick="BucketList.addSticker('📸')">📸</button>
+                            </div>
+                            <button class="btn-clear-stickers" onclick="BucketList.clearStickers()">스티커 모두 지우기</button>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- 결과 카드 -->
+                <div class="result-card-wrapper">
+                    <article class="result-card" id="resultCard" data-theme="default" data-pattern="none" data-frame="modern">
+                        <!-- 스티커 컨테이너 -->
+                        <div class="sticker-container" id="stickerContainer"></div>
+
+                        <header class="result-banner">
+                            <h2>🪣 나의 버킷리스트</h2>
+                            <div class="name" id="resultName"></div>
+                            <div class="date" id="resultDate"></div>
+                        </header>
+                        <div class="result-body" id="resultBody">
+                            <!-- 결과가 여기에 동적으로 생성됨 -->
+                        </div>
+                        <footer class="result-footer-text">
+                            꿈을 적는 순간, 그 꿈은 목표가 됩니다 ✨
+                        </footer>
+                    </article>
+                </div>
+
+                <nav class="result-actions no-print" aria-label="저장 옵션">
+                    <button class="btn btn-secondary" onclick="BucketList.goToWrite()">
+                        <span aria-hidden="true">←</span> 수정하기
+                    </button>
+                    <button class="btn btn-sage" onclick="BucketList.saveAsImage()">
+                        <span aria-hidden="true">📷</span> 이미지 저장
+                    </button>
+                    <button class="btn btn-primary" onclick="BucketList.printResult()">
+                        <span aria-hidden="true">🖨️</span> 인쇄하기
+                    </button>
+                </nav>
+            </div>
+        </section>
+    </main>
+
+    <!-- 스크립트 -->
+    <script src="app.js"></script>
+</body>
+</html>

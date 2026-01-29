@@ -1,0 +1,317 @@
+/**
+ * 개선사항 추가 스타일
+ *
+ * - 실행 취소/다시 실행 버튼
+ * - 에러 알림
+ * - 저장소 경고
+ * - 일반 알림
+ */
+
+
+/* ==========================================================================
+   실행 취소/다시 실행 버튼
+   ========================================================================== */
+
+.undo-redo-controls {
+    position: fixed;
+    bottom: var(--space-6);
+    left: var(--space-6);
+    display: flex;
+    gap: var(--space-2);
+    z-index: var(--z-sticky);
+}
+
+.undo-btn,
+.redo-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-md);
+}
+
+.undo-btn:hover:not(:disabled),
+.redo-btn:hover:not(:disabled) {
+    background: var(--coral-light);
+    border-color: var(--coral);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.undo-btn:disabled,
+.redo-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--sand);
+}
+
+.undo-btn:focus-visible,
+.redo-btn:focus-visible {
+    outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+/* 아이콘 */
+.undo-btn::before {
+    content: '↶';
+}
+
+.redo-btn::before {
+    content: '↷';
+}
+
+
+/* ==========================================================================
+   에러 알림
+   ========================================================================== */
+
+.error-notification {
+    position: fixed;
+    top: var(--space-6);
+    right: var(--space-6);
+    z-index: var(--z-modal);
+    animation: slideInRight 0.3s ease;
+}
+
+.error-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--white);
+    border-left: 4px solid var(--error);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-width: 400px;
+}
+
+.error-icon {
+    font-size: var(--text-2xl);
+    flex-shrink: 0;
+}
+
+.error-message {
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.error-close {
+    background: none;
+    border: none;
+    font-size: var(--text-xl);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.error-close:hover {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+
+/* ==========================================================================
+   저장소 경고
+   ========================================================================== */
+
+.storage-warning {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-modal);
+    animation: slideDown 0.3s ease;
+}
+
+.storage-warning .warning-content {
+    background: linear-gradient(135deg, #FFA726 0%, #FF9800 100%);
+    color: var(--white);
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    text-align: center;
+}
+
+.storage-warning strong {
+    display: block;
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-2);
+}
+
+.storage-warning p {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-4);
+    opacity: 0.95;
+}
+
+.storage-warning button {
+    background: var(--white);
+    color: #FF9800;
+    border: none;
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.storage-warning button:hover {
+    background: var(--cream);
+    transform: scale(1.05);
+}
+
+
+/* ==========================================================================
+   일반 알림 (Notification)
+   ========================================================================== */
+
+.notification {
+    position: fixed;
+    bottom: var(--space-6);
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--navy);
+    color: var(--white);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-xl);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    opacity: 0;
+    transition: all var(--transition-normal);
+    z-index: var(--z-tooltip);
+    box-shadow: var(--shadow-lg);
+    white-space: nowrap;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+
+/* ==========================================================================
+   애니메이션
+   ========================================================================== */
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+
+/* ==========================================================================
+   반응형
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .undo-redo-controls {
+        bottom: var(--space-4);
+        left: var(--space-4);
+    }
+
+    .undo-btn,
+    .redo-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+    }
+
+    .error-notification {
+        top: var(--space-4);
+        right: var(--space-4);
+        left: var(--space-4);
+    }
+
+    .error-content {
+        max-width: 100%;
+    }
+
+    .storage-warning {
+        left: var(--space-4);
+        right: var(--space-4);
+        transform: none;
+    }
+
+    .notification {
+        left: var(--space-4);
+        right: var(--space-4);
+        transform: translateY(100px);
+        text-align: center;
+    }
+
+    .notification.show {
+        transform: translateY(0);
+    }
+}
+
+
+/* ==========================================================================
+   프린트 숨김
+   ========================================================================== */
+
+@media print {
+    .undo-redo-controls,
+    .error-notification,
+    .storage-warning,
+    .notification {
+        display: none !important;
+    }
+}
+
+
+/* ==========================================================================
+   다크 모드 대응
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .undo-btn,
+    .redo-btn {
+        background: var(--navy);
+        color: var(--white);
+        border-color: var(--navy-light);
+    }
+
+    .undo-btn:hover:not(:disabled),
+    .redo-btn:hover:not(:disabled) {
+        background: var(--navy-light);
+    }
+
+    .error-content {
+        background: var(--navy);
+        color: var(--white);
+    }
+}
